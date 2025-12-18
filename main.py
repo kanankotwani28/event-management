@@ -7,10 +7,6 @@ from schemas import EventCreate, BookingCreate
 
 app = FastAPI()
 
-@app.get("/")
-def root():
-    return {"message": "Hello from main"}
-
 Base.metadata.create_all(bind=engine)
 
 def get_db():
@@ -19,6 +15,12 @@ def get_db():
         yield db
     finally:
         db.close()
+
+@app.get("/events")
+def get_all_events(db: Session = Depends(get_db)):
+    events = db.query(Event).all()
+    return events
+
 
 # event endpoint 
 @app.post("/events")
@@ -41,6 +43,9 @@ def book_event(booking: BookingCreate, db: Session = Depends(get_db)):
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     
+    if booking.seat_count <= 0:
+        raise HTTPException(status_code=400, detail="Seat count must be positive")
+    
     if event.available_seats < booking.seat_count:
         raise HTTPException(status_code=400, detail="Sorry! Not enough seats available")
     
@@ -52,3 +57,7 @@ def book_event(booking: BookingCreate, db: Session = Depends(get_db)):
     db.add(new_booking)
     db.commit()
     return {"message":"Booking_successful"}
+
+@app.get("/events/{event_id}/bookings")
+def get_event_bookings(event_id: int, db: Session = Depends(get_db)):
+    return db.query(Booking).filter(Booking.event_id == event_id).all()

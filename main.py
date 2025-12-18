@@ -4,10 +4,12 @@ from database import SessionLocal, Base, engine
 from fastapi.params import Depends
 from model import Event, Booking
 from schemas import EventCreate, BookingCreate
+from rate_limiter import RateLimiterMiddleware
 
 app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
+app.add_middleware(RateLimiterMiddleware)
 
 def get_db():
     db = SessionLocal()

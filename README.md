@@ -68,10 +68,8 @@ The booking endpoint is protected using a **Token Bucket algorithm**.
 pip install -r requirements.txt
 
 ### 2. Start the server
-```bash
 uvicorn main:app --reload
 
 ### 3. Access the API
- ```bash
 API Base URL: http://127.0.0.1:8000
 Swagger Docs: http://127.0.0.1:8000/docs

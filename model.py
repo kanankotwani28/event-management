@@ -7,7 +7,7 @@ class Event(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     total_seats = Column(Integer)
-    available_seats = Column(Integer)
+    available_seats = Column(Integer) # to prevent overbooking
 
 
 class Booking(Base):
@@ -15,4 +15,4 @@ class Booking(Base):
 
     id = Column(Integer, primary_key=True)
     event_id = Column(Integer, ForeignKey("events.id"))
-    seat_count = Column(Integer)
+    seat_count = Column(Integer) # setting the seat count once the seat is avaliable

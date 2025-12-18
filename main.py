@@ -1,9 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from sqlalchemy.orm import Session
 from database import SessionLocal, Base, engine
 from fastapi.params import Depends
-from model import Event
-from schemas import EventCreate
+from model import Event, Booking
+from schemas import EventCreate, BookingCreate
 
 app = FastAPI()
 
@@ -20,6 +20,7 @@ def get_db():
     finally:
         db.close()
 
+# event endpoint 
 @app.post("/events")
 def create_event(event: EventCreate, db: Session = Depends(get_db)):
     new_event = Event(
@@ -31,3 +32,23 @@ def create_event(event: EventCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_event)
     return new_event
+
+#booking endpoint
+@app.post("/bookings")
+def book_event(booking: BookingCreate, db: Session = Depends(get_db)):
+    event = db.query(Event).filter(Event.id == booking.event_id).first()
+
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    if event.available_seats < booking.seat_count:
+        raise HTTPException(status_code=400, detail="Sorry! Not enough seats available")
+    
+    event.available_seats -= booking.seat_count
+    new_booking = Booking(
+        event_id=booking.event_id,
+        seat_count=booking.seat_count
+    )
+    db.add(new_booking)
+    db.commit()
+    return {"message":"Booking_successful"}

@@ -40,7 +40,7 @@ def create_event(event: EventCreate, db: Session = Depends(get_db)):
 #booking endpoint
 @app.post("/bookings")
 def book_event(booking: BookingCreate, db: Session = Depends(get_db)):
-    event = db.query(Event).filter(Event.id == booking.event_id).first()
+    event = db.query(Event).filter(Event.id == booking.event_id).with_for_update().first()
 
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
